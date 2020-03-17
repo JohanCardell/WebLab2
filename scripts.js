@@ -7,16 +7,15 @@ const author = ' ';
 const newAuthor = ' ';
 const id = ' ';
 const keyRequest = baseUrl
-const create = urlKey + `&op=insert&title=${title}&author=${author}`; 
+var createOperation = urlKey + `&op=insert&title=${title}&author=${author}`; 
 //"status": "success", "id" : id generated
-const readRequest = urlKey + '&op=select';
+var readOperation = urlKey + '&op=select';
 //returns JSON object with status success, "data": [{"id", "title", "author", "updated"}]
-const updateRequest = urlKey + `op=update&id=${id}&title=${newTitle}&author=${newAuthor}`;
-const deleteRequest = urlKey + `op=delete&id=${id}`;
+var updateOperation = urlKey + `op=update&id=${id}&title=${newTitle}&author=${newAuthor}`;
+var deleteOperation = urlKey + `op=delete&id=${id}`;
 var currentKey = localStorage.getItem('apiAccessKey');
 
 
-//fetch(url).then(???)
 // check if json.status is error/success
 
 const bookElements = document.getElementsByClassName('book-element');
@@ -31,42 +30,47 @@ function addBook(){
     // btnTimeout(elem)
 }
 
+function addBook(title, author) {
+    
+        fetch(insertBook + '&title=' + title + '&author=' + author)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                if (data.status != "success" && currentRequests < maxRequests) {
+                    currentRequests++;
+                    addBook(title, author);
+                } else {
+                    ResetForms();      
+                }
+            });
+}
+
 function showBooks() {
 
 }
-var element = document.getElementsByClassName('');
 bookArray.push(document.readRequest);
 
-// function showCurrentKey(){
-//     if(currentKey == null){
-//         return 'No current key'
-//     } else{
-//         return currentKey;
-
-//     }
-    
-// }
 function requestKey(){
     
     let elem = document.getElementById('current_key');
     elem.innerHTML = 'Generating key...'
     fetch('https://www.forverkliga.se/JavaScript/api/crud.php?requestKey')
         .then(response => response.json())
-        .then((myJson) => {
+        .then((data) => {
             if (currentKey == null) {
                 requestKey();
             } else {
-                console.log(myJson.key);
+                console.log(data.key);
                 localStorage.setItem('apiAccessKey', myJson.key);
                 console.log(localStorage.getItem('apiAccessKey'));
-                elem.innerHTML = myJson.key;
+                elem.innerHTML = data.key;
             }
     });
     
 }
 
 function btnTimeout(button){
-    let buttons = document.getElementsByClassName("button");
-    buttons.disabled = true;
-    setTimeout(function(){buttons.disabled = false;}, 2000);
+    button.disabled = true;
+    setTimeout(function(){button.disabled = false;}, 1000);
 }

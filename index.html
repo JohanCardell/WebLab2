@@ -52,14 +52,14 @@
   </header>
   <div class="w3-padding-64 w3-content"></divclass>
     <h2 class="w3-text-light-grey" id="current_key"></h2>
-    <button class="button" onclick="requestKey(); btnTimeout()">Generate new key</button>
+    <button onclick="requestKey(); btnTimeout(this)">Generate new key</button>
     <!-- <button onclick="this.innerHTML = showCurrentKey()">Click to show key</button> -->
   </div>
   <div class="w3-padding-64 w3-content">
-    <form>
+    <form action="www.forverkliga.se/JavaScript/api/crud.php?">
       <input type="text" id="author" name="author" placeholder="Author"><br><br>
       <input type="text" id="title" name="title" placeholder="Book title"><br><br>
-      <input class="button" id="btn_add_book" onclick="addBook(); btnTimeout()" type="submit" value="Add">
+      <input onclick="addBook(); btnTimeout(this)" type="submit" value="Add">
     </form> 
 </div>
   

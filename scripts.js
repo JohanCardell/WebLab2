@@ -9,14 +9,14 @@ const id = ' ';
 const keyRequest = baseUrl
 var createOperation;
 //"status": "success", "id" : id generated
-var readOperation =  baseUrl + '&op=select';
+var readOperation;
 //returns JSON object with status success, "data": [{"id", "title", "author", "updated"}]
 // var updateOperation = urlKey + `op=update&id=${id}&title=${newTitle}&author=${newAuthor}`;
 // var deleteOperation = urlKey + `op=delete&id=${id}`;
 var currentKey = localStorage.getItem('apiAccessKey');
 
-var currentRequests = 0;
-var maxRequests = 10;
+var requestsCurrent = 0;
+var requestLimit = 10;
 
 
 // check if json.status is error/success
@@ -36,50 +36,58 @@ function AddBook() {
                 return response.json();
             })
             .then((myJson) => {
-                if (myJson.status != "success" && currentRequests < maxRequests) {
-                    currentRequests++;
+                if (myJson.status != "success" && requestsCurrent < requestLimit) {
+                    requestsCurrent++;
                     console.log(createOperation);
                     AddBook();
+                } else if(requestsCurrent >= requestLimit){
+                    alert(myJson.message);
                 } else{
-                    if(myJson.status != "success" && currentRequests >= maxRequests){
-                        alert(myJson.message);
-                    }
-                    RestoreValues();
-                    console.log(createOperation);
+                    Refresh();
                 }
             });
     
 }
 
-function GetBooks() {
-    var elements = document.getElementsByClassName("book-element");
-    while (elements.length > 0) {
-        elements[0].parentNode.removeChild(elements[0]);
+function BooksEmpty() {
+    let currentBooks = document.getElementsByClassName('book-list-item');
+    while (currentBooks.length > 0) {
+        currentBooks[0].parentNode.removeChild(currentBooks[0]);
     }
+}
 
-    fetch(getBooks)
+function BooksFill(){
+    fetch(readOperation)
         .then((response) => {
             return response.json();
         })
         .then((myJson) => {
-            if (myJson['data'] == undefined && currentRequests <= maxRequests) {
-                currentRequests++;
-                GetBooks();
+            if (requestsCurrent > requestLimit){
+                alert
+            }
+            if (myJson['data'] == undefined && requestsCurrent < requestLimit) {
+                requestsCurrent++;
+                BooksFill(readOperation);
             } else {
-
-                const html = myJson['data'].map(book => { console.log(typeof book.id.toString()); return `<div class="bookListItem"><p>Author: ${book.author} , Title: ${book.title} </p><button onclick="DeleteBook(${book.id})">Delete</button><button onclick="UpdateBook(${book.id}, '${book.title}', '${book.author}')">UpdateBook</button></div>` }).join('');
-                document.querySelector('#book-element').insertAdjacentHTML('afterbegin', html);
+                const bookElementHtml = myJson['data'].map(book => {
+                    console.log(typeof book.id.toString());
+                    return `<div class="book-list-item w3-half">
+                            <p>Author: ${book.author} , Title: ${book.title} </p>
+                            <button onclick="DeleteBook(${book.id})">Delete</button>
+                            <button onclick="EditBook(${book.id}, '${book.title}', '${book.author}')">Edit</button>
+                            </div>` }).join('');
+                document.querySelector('#book-list').insertAdjacentHTML('afterbegin', bookElementHtml);
             }
             console.log(myJson['data']);    
         });
 }
 
-function ValidateUrl(){
-    if(currentKey == null || currentKey == undefined){
-        RequestKey();
-    }
-    AmendUrls();
-}
+// function ValidateUrl(){
+//     if(currentKey == null || currentKey == undefined){
+//         RequestKey();
+//     }
+//     AmendUrls();
+// }
 
 function RequestKey(){
     
@@ -92,24 +100,26 @@ function RequestKey(){
             localStorage.removeItem('apiAccessKey');
             localStorage.setItem('apiAccessKey', myJson.key);
             elem.innerHTML = myJson.key;
-            console.log(localStorage.getItem('apiAccessKey'));
-            AmendUrls()
+            Refresh();
         });
 }
 
+function Refresh(){
+    AmendUrls();
+    RestoreValues();
+    BooksEmpty();
+    BooksFill();
+}
 function RestoreValues(){
-    if (currentRequests > maxRequests) {
-        alert("Hit max amount of errors from server, please try again)");
-    }
-    currentRequests = 0;
-
+    requestsCurrent = 0;
     document.getElementById('author-submit').value = ""
     document.getElementById('title-submit').value = "";
 }
 
 function AmendUrls(){
     keyUrl = baseUrl + currentKey;
-    // createOpUrl = keyUrl + `&op=insert&title=${document.getElementById('title-submit').value}&author=${document.getElementById('author-submit').value}`;
+    createOpUrl = keyUrl + `&op=insert&title=${document.getElementById('title-submit').value}&author=${document.getElementById('author-submit').value}`;
+    readOperation = keyUrl + '&op=select'; 
 
 }
 

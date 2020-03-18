@@ -34,7 +34,7 @@
   </a>
 </nav>
 
-<body class="w3-black" onload=ValidateUrl()>
+<body class="w3-black" onload=Refresh()>
   
 <!-- Navbar on small screens (Hidden on medium and large screens) -->
 <div class="w3-top w3-hide-large w3-hide-medium" id="myNavbar">
@@ -62,19 +62,14 @@
       <input type="button" onclick="AddBook(); BtnTimeout(this)" value="Add">
     </form> 
 </div>
-  
+<div class book-element></div>  
+
   <!-- Books Section -->
   <div class="w3-padding-64 w3-content" id="books">
     <h2 class="w3-text-light-grey">Books</h2>
     <hr style="width:200px" class="w3-opacity">
-
-    <!-- Grid for books -->
     <div class="w3-row-padding" style="margin:0 -16px">
-      <div class="w3-half book-element">
-      </div>
-      <div class="w3-half">
-      </div>
-    <!-- End book grid -->
+      <div class="w3-half"id="book-list"></div>
     </div>
   <!-- End books Section -->
   </div>

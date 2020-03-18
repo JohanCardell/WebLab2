@@ -1,87 +1,139 @@
-const baseUrl = 'https://www.forverkliga.se/JavaScript/api/crud.php?key=';
+var baseUrl = 'https://www.forverkliga.se/JavaScript/api/crud.php?key=';
 var accessUrl;
-var keyRequestUrl = "https://www.forverkliga.se/JavaScript/api/crud.php?requestKey";  // once you have a key, it is ok to store it in a variable
+var currentKey;
+var keyRequestUrl = "https://www.forverkliga.se/JavaScript/api/crud.php?requestKey";
 var createOpUrl;
 var readOpUrl;
-//returns JSON object with status success, "data": [{"id", "title", "author", "updated"}]
-// var updateOperation = urlKey + `op=update&id=${id}&title=${newTitle}&author=${newAuthor}`;
-// var deleteOperation = urlKey + `op=delete&id=${id}`;
-var currentKey;
-var requestsCurrent = 0;
+var updateOpUrl;
+var deleteOpUrl;
+var currentRequests = 0;
+var selectedBookId = 0;
 var requestLimit = 10;
+var titleInputElement;
+var authorInputElement;
+var newTitle;
+var newAuthor;
+var queryParam;
+var currentBooks;
 
 function AddBook() {
-        fetch(createOpUrl + `&title=${document.getElementById('title-submit').value}&author=${document.getElementById('author-submit').value}`)
-            .then((response) => {
-                return response.json();
-            })
-            .then((myJson) => {
-                if (myJson.status != "success" && requestsCurrent <= requestLimit) {
-                    requestsCurrent++;
-                    AddBook();
-                } else {  
-                    Refresh();
-                }
-            });
-    
+    titleInputElement = titleInputElement = document.getElementById('title-input');
+    authorInputElement = document.getElementById('author-input');
+    newTitle = titleInputElement.value;
+    newAuthor = authorInputElement.value;
+    queryParam = '&title=' + newTitle + '&author=' + newAuthor;
+    if (selectedBookId == 0){
+        fetch(createOpUrl + queryParam)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            if (data.status != "success" && currentRequests < requestLimit) {
+                currentRequests++;
+                AddBook();
+            } else {  
+                Refresh();
+            }
+        });
+    } else {
+        fetch(updateOpUrl + selectedBookId + queryParam)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            if (data.status != "success" && currentRequests < requestLimit) {
+                currentRequests++;
+                AddBook();
+            } else {
+                document.getElementById('add-update-button').value = 'Add';   
+                Refresh();
+            }
+        }); 
+    }
 }
 
-function BooksEmpty() {
-    let currentBooks = document.getElementsByClassName('book-list-item');
+function EditBook(bookId, selectedTitle, selectedAuthor) {
+    selectedBookId = bookId;
+    document.getElementById('author-input').value = selectedAuthor;
+    document.getElementById('title-input').value = selectedTitle;
+    document.getElementById('add-update-button').value = 'Click to update';  
+}
+
+function DeleteBook(bookId){
+    fetch(deleteOpUrl + bookId)
+    .then((response) => {
+        
+        return response.json()
+    })
+    .then((data) => {
+        if (data.status != "success" && currentRequests < requestLimit) {
+            currentRequests++;
+            DeleteBook(bookId);
+        } else {  
+            Refresh();
+        }
+    });
+}
+
+function EmptyBookList() {
+    currentBooks = document.getElementsByClassName('book-list-item');
     while (currentBooks.length > 0) {
         currentBooks[0].parentNode.removeChild(currentBooks[0]);
     }
 }
 
-function BooksFill(){
+function FillBookList(){
     fetch(readOpUrl)
-        .then((response) => {
-            return response.json();
-        })
-        .then((myJson) => {
-            if (myJson['data'] == undefined && requestsCurrent <= requestLimit) {
-                requestsCurrent++;
-                BooksFill();
-            } else {
-                const bookElementHtml = myJson['data'].map(book => {
-                    console.log(typeof book.id.toString());
-                    return `<div class="book-list-item w3-half">
-                            <p>Author: ${book.author} , Title: ${book.title} </p>
-                            <button onclick="DeleteBook(${book.id})">Delete</button>
-                            <button onclick="EditBook(${book.id}, '${book.title}', '${book.author}')">Edit</button>
-                            </div>` }).join('');
-                document.querySelector('#book-list').insertAdjacentHTML('afterbegin', bookElementHtml);
-                console.log(myJson['data']);    
-            }
-        });
+    .then((response) => {
+        return response.json();
+    })
+    .then((data) => {
+        if (data['data'] == undefined && currentRequests < requestLimit) {
+            currentRequests++;
+            FillBookList();
+        } else if(currentRequests >= requestLimit){
+            Refresh();
+        } else {
+            console.log('Current books: ');
+            const bookElementHtml = data['data'].map(book => {
+                return `<div class="book-list-item w3-half" style="padding:50px">
+                        <p>Author: ${book.author}<br>
+                        Title: ${book.title} </p>
+                        <button onclick="DeleteBook('${book.id}')">Delete</button>
+                        <button onclick="EditBook('${book.id}', '${book.title}', '${book.author}')">Edit</button><br>
+                        </div>` 
+                    }).join('');
+            document.querySelector('#book-list').insertAdjacentHTML('afterbegin', bookElementHtml);
+            console.log(data['data']);
+        }
+    });
 }
 
 function RequestKey(){
     fetch(keyRequestUrl)
         .then(response => response.json())
-        .then((myJson) => {
-            console.log(myJson.key);
-            localStorage.removeItem('apiAccessKey');
-            localStorage.setItem('apiAccessKey', myJson.key);
-           
+        .then((data) => {
+            console.log(`New access key: ${data.key}`);
+            localStorage.setItem('apiAccessKey', data.key);
             Refresh()
         });
 }
 
 function Refresh(){
-    if(requestsCurrent > requestLimit){
+    if(currentRequests >= requestLimit){
         alert('Error: too many failed requests. Try again later')
     }
-    ValidateAccessUrl();
-    BooksEmpty();
-    BooksFill();
-    requestsCurrent = 0;
-    document.getElementById('author-submit').value = ""
-    document.getElementById('title-submit').value = "";
-    document.getElementById("store-header").innerText = `Generic book store #${currentKey}`;
+    RefreshAccessUrl();
+    EmptyBookList();
+    FillBookList();
+    currentRequests = 0;
+    selectedBookId = 0;
+    document.getElementById('author-input').value = ""
+    document.getElementById('title-input').value = "";
+    document.getElementById('store-header').innerText = `Book store seed #${currentKey}`;
 }
 
-function ValidateAccessUrl(){
+function RefreshAccessUrl(){
     currentKey = localStorage.getItem('apiAccessKey');
     if(currentKey == null || currentKey == undefined){
         RequestKey();
@@ -90,7 +142,9 @@ function ValidateAccessUrl(){
     }
     accessUrl = baseUrl + currentKey;
     createOpUrl = accessUrl + '&op=insert';
-    readOpUrl = accessUrl + '&op=select'; 
+    readOpUrl = accessUrl + '&op=select';
+    updateOpUrl = accessUrl + '&op=update&id=';
+    deleteOpUrl = accessUrl + '&op=delete&id=';
 
 }
 

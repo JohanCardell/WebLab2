@@ -51,17 +51,15 @@
     <h1 class="w3-jumbo" id="store-header">Book store</h1>
   </header>
   <div class="w3-padding-64 w3-content w3-center"></divclass>
-    <button onclick="RequestKey(); BtnTimeout(this)" >Generate new store</button>
+    <button onclick="RequestKey(); BtnTimeout(this)" >New store seed</button>
   </div>
-  <div class="w3-padding-64 w3-content w3-center" >
+  <div class="w3-padding-64 w3-content w3-center">
     <form>
-      <input type="text" id="author-submit" placeholder="Author"><br><br>
-      <input type="text" id="title-submit" placeholder="Book title"><br><br>
-      <input type="button" onclick="AddBook(); BtnTimeout(this)" value="Add">
+      <input type="text" id="author-input" placeholder="Author"><br><br>
+      <input type="text" id="title-input" placeholder="Book title"><br><br>
+      <input type="button" id="add-update-button" onclick="AddBook(); BtnTimeout(this)" value="Add">
     </form> 
-</div>
-<div class book-element></div>  
-
+  </div>
   <!-- Books Section -->
   <div class="w3-padding-64 w3-content w3-center" id="books">
     <h2 class="w3-text-light-grey ">Books</h2>

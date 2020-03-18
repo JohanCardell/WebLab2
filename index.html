@@ -34,7 +34,7 @@
   </a>
 </nav>
 
-<body class="w3-black" onload="requestKey()">
+<body class="w3-black" onload=ValidateUrl()>
   
 <!-- Navbar on small screens (Hidden on medium and large screens) -->
 <div class="w3-top w3-hide-large w3-hide-medium" id="myNavbar">
@@ -51,15 +51,15 @@
     <h1 class="w3-jumbo">Book store</h1>
   </header>
   <div class="w3-padding-64 w3-content"></divclass>
-    <h2 class="w3-text-light-grey" id="current_key"></h2>
-    <button onclick="requestKey(); btnTimeout(this)">Generate new key</button>
+    <h2 class="w3-text-light-grey" id="current-key"></h2>
+    <button onclick="RequestKey(); BtnTimeout(this)">Generate new key</button>
     <!-- <button onclick="this.innerHTML = showCurrentKey()">Click to show key</button> -->
   </div>
   <div class="w3-padding-64 w3-content">
-    <form action="www.forverkliga.se/JavaScript/api/crud.php?">
-      <input type="text" id="author" name="author" placeholder="Author"><br><br>
-      <input type="text" id="title" name="title" placeholder="Book title"><br><br>
-      <input onclick="addBook(); btnTimeout(this)" type="submit" value="Add">
+    <form>
+      <input type="text" id="author-submit" placeholder="Author"><br><br>
+      <input type="text" id="title-submit" placeholder="Book title"><br><br>
+      <input type="button" onclick="AddBook(); BtnTimeout(this)" value="Add">
     </form> 
 </div>
   

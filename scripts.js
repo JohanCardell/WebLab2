@@ -9,6 +9,7 @@ var deleteOpUrl;
 var currentRequests = 0;
 var selectedBookId = 0;
 var requestLimit = 10;
+var bookElementHtml
 var titleInputElement;
 var authorInputElement;
 var newTitle;
@@ -95,14 +96,14 @@ function FillBookList(){
             Refresh();
         } else {
             console.log('Current books: ');
-            const bookElementHtml = data['data'].map(book => {
+            bookElementHtml = data['data'].map(book => {
                 return `<div class="book-list-item w3-half" style="padding:50px">
                         <p>Author: ${book.author}<br>
                         Title: ${book.title} </p>
                         <button onclick="DeleteBook('${book.id}')">Delete</button>
                         <button onclick="EditBook('${book.id}', '${book.title}', '${book.author}')">Edit</button><br>
                         </div>` 
-                    }).join('');
+            }).join('');
             document.querySelector('#book-list').insertAdjacentHTML('afterbegin', bookElementHtml);
             console.log(data['data']);
         }
@@ -111,12 +112,12 @@ function FillBookList(){
 
 function RequestKey(){
     fetch(keyRequestUrl)
-        .then(response => response.json())
-        .then((data) => {
-            console.log(`New access key: ${data.key}`);
-            localStorage.setItem('apiAccessKey', data.key);
-            Refresh()
-        });
+    .then(response => response.json())
+    .then((data) => {
+        console.log(`New access key: ${data.key}`);
+        localStorage.setItem('apiAccessKey', data.key);
+        Refresh()
+    });
 }
 
 function Refresh(){
